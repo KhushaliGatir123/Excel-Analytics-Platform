@@ -1,47 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
+const auth = require("../middleware/auth");
 const File = require("../models/File");
-const multer = require("multer");
-const xlsx = require("xlsx");
-
-const upload = multer({ dest: "uploads/" });
-
-const auth = (req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
-  if (!token) {
-    return res.status(401).json({ msg: "No token, authorization denied" });
-  }
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded.user;
-    next();
-  } catch (err) {
-    res.status(401).json({ msg: "Token is not valid" });
-  }
-};
-
-router.post("/upload", auth, upload.single("file"), async (req, res) => {
-  try {
-    const workbook = xlsx.readFile(req.file.path);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = xlsx.utils.sheet_to_json(sheet);
-    const file = new File({
-      userId: req.user.id,
-      filename: req.file.originalname,
-      data,
-    });
-    await file.save();
-    res.status(201).json({ file });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ msg: "Server error" });
-  }
-});
+const Graph = require("../models/Graph");
 
 router.get("/", auth, async (req, res) => {
   try {
-    const files = await File.find({ userId: req.user.id });
+    const files = await File.find({ userId: req.user.id }).sort({ uploadDate: -1 });
     res.json(files);
   } catch (error) {
     console.error(error.message);
@@ -49,13 +14,29 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-router.get("/:id", auth, async (req, res) => {
+router.post("/graphs", auth, async (req, res) => {
+  const { fileName, xAxis, yAxis, types, timestamp } = req.body;
   try {
-    const file = await File.findById(req.params.id);
-    if (!file || file.userId.toString() !== req.user.id) {
-      return res.status(404).json({ msg: "File not found" });
-    }
-    res.json(file);
+    const graph = new Graph({
+      userId: req.user.id,
+      fileName,
+      xAxis,
+      yAxis,
+      types,
+      timestamp,
+    });
+    await graph.save();
+    res.json(graph);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+router.get("/graphs", auth, async (req, res) => {
+  try {
+    const graphs = await Graph.find({ userId: req.user.id }).sort({ timestamp: -1 });
+    res.json(graphs);
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ msg: "Server error" });
