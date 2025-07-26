@@ -222,39 +222,42 @@ const UserDashboard = () => {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: "top", labels: { color: "#FFFFFF", font: { size: 14, weight: "bold" } } },
+      legend: { position: "top", labels: { color: "#003060", font: { size: 14, weight: "bold" } } },
       title: {
         display: true,
         text: `${yAxis} vs. ${xAxis} (${type})`,
-        color: "#FFFFFF",
+        color: "#003060",
         font: { size: 16, weight: "bold" },
       },
       datalabels: {
-        display: type === "Pie",
-        color: "#FFFFFF",
+        display: ["Bar", "Line", "Pie"].includes(type),
+        color: "#003060",
         font: { size: 12, weight: "bold" },
         formatter: (value, context) => {
+          if (type === "Bar" || type === "Line") return value;
           if (type === "Pie") {
             const sum = context.dataset.data.reduce((a, b) => a + b, 0);
-            const percentage = ((value / sum) * 100).toFixed(1) + "%";
-            return `${context.chart.data.labels[context.dataIndex]}: ${percentage}`;
+            return ((value / sum) * 100).toFixed(1) + "%";
           }
-          return value;
+          return "";
         },
+        anchor: type === "Line" ? "end" : "center", // Position above points for Line
+        align: type === "Line" ? "top" : "center", // Align above points for Line
+        offset: type === "Line" ? 5 : 0, // Small offset for clarity
       },
     },
     scales: type !== "Pie" ? {
       x: {
-        title: { display: true, text: xAxis, color: "#FFFFFF", font: { size: 14 } },
-        ticks: { color: "#FFFFFF" },
+        title: { display: true, text: xAxis, color: "#003060", font: { size: 14 } },
+        ticks: { color: "#003060" },
       },
       y: {
-        title: { display: true, text: yAxis, color: "#FFFFFF", font: { size: 14 } },
-        ticks: { color: "#FFFFFF" },
+        title: { display: true, text: yAxis, color: "#003060", font: { size: 14 } },
+        ticks: { color: "#003060" },
       },
     } : undefined,
   });
-
+  
   const getPlotlyData = (file, xAxis, yAxis, type) => {
     if (!file || !xAxis || !yAxis) return [];
     const x = file.data.map((row) => row[xAxis] || `Row ${file.data.indexOf(row) + 1}`);
@@ -267,6 +270,9 @@ const UserDashboard = () => {
         z,
         type: type === "3D Bar" ? "bar" : "scatter3d",
         mode: type === "3D Line" ? "lines+markers" : undefined,
+        text: type === "3D Bar" ? y.map(String) : undefined,
+        textposition: type === "3D Bar" ? "top center" : undefined,
+        textfont: { color: "#003060", size: 12 },
         marker: { color: "#0E86D4", size: 5 },
         line: type === "3D Line" ? { color: "#0E86D4", width: 2 } : undefined,
         name: yAxis,
@@ -277,12 +283,12 @@ const UserDashboard = () => {
   const getPlotlyLayout = (xAxis, yAxis, type) => ({
     title: {
       text: `${yAxis} vs. ${xAxis} (${type})`,
-      font: { color: "#FFFFFF", size: 16, family: "Arial, bold" },
+      font: { color: "#003060", size: 16, family: "Arial, bold" },
     },
     scene: {
-      xaxis: { title: { text: xAxis, font: { color: "#FFFFFF", size: 14 } }, tickfont: { color: "#FFFFFF" } },
-      yaxis: { title: { text: yAxis, font: { color: "#FFFFFF", size: 14 } }, tickfont: { color: "#FFFFFF" } },
-      zaxis: { title: { text: "Value", font: { color: "#FFFFFF", size: 14 } }, tickfont: { color: "#FFFFFF" } },
+      xaxis: { title: { text: xAxis, font: { color: "#003060", size: 14 } }, tickfont: { color: "#003060" } },
+      yaxis: { title: { text: yAxis, font: { color: "#003060", size: 14 } }, tickfont: { color: "#003060" } },
+      zaxis: { title: { text: "Value", font: { color: "#003060", size: 14 } }, tickfont: { color: "#003060" } },
     },
     margin: { l: 30, r: 30, b: 30, t: 50 },
     paper_bgcolor: "#FFFFFF",
@@ -497,12 +503,14 @@ const UserDashboard = () => {
         <div className="max-w-5xl mx-auto">
           {activeSection === "dashboard" && (
             <div className="bg-white rounded-lg shadow-md p-8">
-              <h2 className="text-3xl font-bold text-[#003060] mb-4">
-                Welcome, {username}
-              </h2>
-              <p className="text-lg text-[#055C9D] mb-8">
-                Transform your data into stunning visualizations with ease.
-              </p>
+              <div className="bg-[#68BBE3] rounded-lg p-6 mb-6">
+                <h2 className="text-3xl font-bold text-[#003060] mb-2">
+                  Welcome, {username}
+                </h2>
+                <p className="text-lg text-[#055C9D]">
+                  Transform your data into stunning visualizations with ease.
+                </p>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-200">
                   <h3 className="text-lg font-medium text-[#003060]">Uploaded Files</h3>
