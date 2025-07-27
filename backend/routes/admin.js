@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require("../models/User");
 const Graph = require("../models/Graph");
 const Activity = require("../models/Activity");
-const File = require("../models/File"); // Add File model import
+const File = require("../models/File");
 
 // Apply role-based authentication with fixed token
 router.use((req, res, next) => {
@@ -88,12 +88,11 @@ router.get("/activity", async (req, res) => {
 router.get("/stats", async (req, res) => {
   try {
     const totalCharts = await Graph.countDocuments();
-    const totalFiles = await File.countDocuments(); // Now File is imported
+    const totalFiles = await File.countDocuments(); // Ensure File model is imported
     const users = await User.countDocuments();
     const avgChartsPerUser = users > 0 ? totalCharts / users : 0;
     res.json({ totalCharts, totalFiles, avgChartsPerUser });
   } catch (error) {
-    console.error("Stats fetch error:", error.message, error.stack); // Add logging
     res.status(500).json({ msg: "Server error while fetching stats" });
   }
 });

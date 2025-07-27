@@ -247,6 +247,15 @@ const AdminDashboard = () => {
               >
                 Login
               </button>
+              <div className="mt-6 pt-4 border-t border-[#423D80]/30">
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="w-full px-4 py-2 bg-[#2B2C5B]/50 text-white font-bold rounded-lg border border-[#423D80] hover:bg-[#423D80] hover:border-[#5A4FCF] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  ← Back to User Login
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -594,4 +603,4 @@ const AdminDashboard = () => {
   )
 }
 
-export default AdminDashboard;
+export default AdminDashboard
