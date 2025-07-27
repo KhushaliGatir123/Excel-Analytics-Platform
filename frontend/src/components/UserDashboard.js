@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useEffect, useRef } from "react"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
@@ -70,8 +72,17 @@ const UserDashboard = () => {
           navigate("/login")
           return
         }
+
+        // Enhanced username extraction with debugging
         const decoded = jwtDecode(token)
-        setUsername(decoded.username || "User")
+        console.log("Decoded JWT token:", decoded) // Debug log
+
+        // Try multiple possible username fields in the token
+        const extractedUsername =
+          decoded.user?.username || decoded.username || decoded.user?.name || decoded.name || "User"
+
+        console.log("Extracted username:", extractedUsername) // Debug log
+        setUsername(extractedUsername)
 
         const [filesRes, graphsRes] = await Promise.all([
           axios.get("http://localhost:5000/api/files", {
@@ -97,6 +108,7 @@ const UserDashboard = () => {
         )
         setError("")
       } catch (error) {
+        console.error("Error in fetchData:", error) // Debug log
         setError("Failed to load data: " + (error.response?.data?.msg || error.message))
         toast.error("Failed to load data")
       }
@@ -599,9 +611,9 @@ const UserDashboard = () => {
                     className="text-3xl font-bold text-white mb-2"
                     style={{ textShadow: "0 4px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(66, 61, 128, 0.3)" }}
                   >
-                    Welcome, {username}
+                    Welcome back, {username.charAt(0).toUpperCase() + username.slice(1)}! 👋
                   </h2>
-                  <p className="text-lg text-gray-300">Transform your data into stunning visualizations with ease.</p>
+                  <p className="text-lg text-gray-300">Ready to transform your data into stunning visualizations?</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="bg-[#2B2C5B]/50 rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-[#423D80]/30 hover:border-[#423D80]/50">
@@ -897,4 +909,4 @@ const UserDashboard = () => {
   )
 }
 
-export default UserDashboard
+export default UserDashboard;

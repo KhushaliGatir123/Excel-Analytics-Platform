@@ -29,6 +29,7 @@ router.post("/signup", async (req, res) => {
       user: {
         id: user._id,
         role: user.role,
+        username: user.username
       },
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -59,6 +60,7 @@ router.post("/login", async (req, res) => {
       user: {
         id: user._id,
         role: user.role,
+        username: user.username
       },
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
